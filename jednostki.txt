@@ -1,0 +1,20 @@
+postać nie T i nie B (L - type)
+postać T (L2 - type)
+postać R (L3 - type)
+mieloblastyczne o niskim niezróżnicowaniu
+mieloblastyczne z dojrzewaniem
+granulocytowa
+mielomonoblastyczna
+monoblastyczna
+erytroleukemia
+podostra granulocytarna
+granulocytarna
+limfocytarna
+mielomonocytarna
+monocytarna
+chłoniak limfatyczny białaczka
+plazmocytowa
+wielokapilarnokomórkowa
+eozynofilowa
+bazofilowa
+białaczka komórek wielojądrzastych
