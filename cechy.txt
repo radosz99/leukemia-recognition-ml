@@ -18,4 +18,4 @@ Stan pobudzenia szpiku
 Główne komórki w szpiku
 Poziom limfocytów
 Reakcja
-Class
+Nr klasy
