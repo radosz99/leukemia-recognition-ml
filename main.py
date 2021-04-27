@@ -111,7 +111,7 @@ def test():
     global scores
     scores = np.zeros((len(clfs), number_of_features, n_splits * n_repeats))
 
-    for features_index in range(0, features_amount):
+    for features_index in range(0, 1):
         selected_features_count = features_index + 1
         k_best_selector = SelectKBest(score_func=f_classif, k=selected_features_count)
         selected_data = k_best_selector.fit_transform(x, y)
@@ -122,7 +122,10 @@ def test():
                 clf = clone(clfs[clf_name])
                 clf.fit(X_train, y_train)
                 y_pred = clf.predict(X_test)
-                scores[clf_id, features_index, fold_id] = accuracy_score(y_test, y_pred)
+                score = accuracy_score(y_test, y_pred)
+                scores[clf_id, features_index, fold_id] = score
+                np.save(f"results_{features_index}_{clf_name}_{fold_id}", score)
+                break
     print(scores)
     np.save('results', scores)
 
