@@ -109,7 +109,7 @@ def start():
 
 def test():
     global scores
-    scores = np.zeros((len(clfs), number_of_features, n_splits * n_repeats))
+    scores = np.zeros((len(clfs), features_amount, n_splits * n_repeats))
 
     for features_index in range(0, features_amount):
         selected_features_count = features_index + 1
