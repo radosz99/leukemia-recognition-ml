@@ -4,13 +4,31 @@ import matplotlib.pyplot as plt
 import glob
 import os
 from sklearn.feature_selection import SelectKBest, f_classif
+from sklearn.model_selection import RepeatedStratifiedKFold
+from sklearn.metrics import accuracy_score
+from sklearn.neural_network import MLPClassifier
+from sklearn.base import clone
+
+clfs = {
+    'mlp_100_true': MLPClassifier(max_iter=10000, hidden_layer_sizes=100, solver='sgd', momentum=0.9),
+    'mlp_200_true':MLPClassifier(max_iter=10000, hidden_layer_sizes=200, solver='sgd', momentum=0.9),
+    'mlp_300_true': MLPClassifier(max_iter=10000, hidden_layer_sizes=300, solver='sgd', momentum=0.9),
+    'mlp_100_false': MLPClassifier(max_iter=10000, hidden_layer_sizes=100, solver='sgd', momentum=0),
+    'mlp_200_false': MLPClassifier(max_iter=10000, hidden_layer_sizes=200, solver='sgd', momentum=0),
+    'mlp_300_false': MLPClassifier(max_iter=10000, hidden_layer_sizes=300, solver='sgd', momentum=0)
+}
 
 classes = {}
 symptoms = []
 file_prefix = 'output/bialaczka_'
 classes_size = 0
+features_amount = 8
 data_list = []
-
+x, y , number_of_features, scores  = None, None, None, None
+n_splits = 2
+n_repeats = 5
+rskf = RepeatedStratifiedKFold(
+    n_splits=n_splits, n_repeats=n_repeats, random_state=42)
 
 def get_lines_from_file(filename):
     with open(filename, 'r', encoding='utf-8') as myfile:
@@ -46,8 +64,10 @@ def evaluate():
 
 
 def create_ranking(dataset):
+    global x, y, number_of_features
     x = dataset.drop('Nr klasy', axis=1)
     y = dataset['Nr klasy']
+    number_of_features = len(x.columns)
     k_best_selector = SelectKBest(score_func=f_classif, k=len(symptoms) - 1)
     k_best_selector.fit(x, y)
     scores_ranking = [(symptom, round(score, 2)) for symptom, score in zip(x.columns, k_best_selector.scores_)]
@@ -87,6 +107,25 @@ def start():
     for item in ranking:
         print(f"{item[0]} - {item[1]}")
 
+def test():
+    global scores
+    scores = np.zeros((len(clfs), number_of_features, n_splits * n_repeats))
+
+    for features_index in range(0, features_amount):
+        selected_features_count = features_index + 1
+        k_best_selector = SelectKBest(score_func=f_classif, k=selected_features_count)
+        selected_data = k_best_selector.fit_transform(x, y)
+        for fold_id, (train_index, test_index) in enumerate(rskf.split(selected_data, y)):
+            for clf_id, clf_name in enumerate(clfs):
+                X_train, X_test = selected_data[train_index], selected_data[test_index]
+                y_train, y_test = y.iloc[train_index], y.iloc[test_index]
+                clf = clone(clfs[clf_name])
+                clf.fit(X_train, y_train)
+                y_pred = clf.predict(X_test)
+                scores[clf_id, features_index, fold_id] = accuracy_score(y_test, y_pred)
+    print(scores)
+    np.save('results', scores)
 
 if(__name__ == '__main__'):
     start()
+    test()
